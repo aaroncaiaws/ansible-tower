@@ -1,0 +1,21 @@
+sudo: required
+
+services:
+  - docker
+
+script:
+  - REPO=`echo "$TRAVIS_REPO_SLUG" | tr '[:upper:]' '[:lower:]'`
+  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - docker build --label VCS_REF=$TRAVIS_COMMIT -t $REPO:$TRAVIS_BRANCH .
+  - docker tag $REPO:$TRAVIS_BRANCH $REPO:latest
+  - if [ -n "$TRAVIS_TAG" ]; then
+        docker tag $REPO:$TRAVIS_BRANCH $REPO:$TRAVIS_TAG
+        docker tag $REPO:$TRAVIS_BRANCH $REPO:latest
+        docker push $REPO:latest;
+        docker push $REPO:$TRAVIS_TAG;
+    elif [ "$TRAVIS_BRANCH" == "master" ]; then
+        docker tag $REPO:$TRAVIS_BRANCH $REPO:latest
+        docker push $REPO:latest;
+    else
+        docker push $REPO:$TRAVIS_BRANCH;
+    fi
