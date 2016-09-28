@@ -1,45 +1,104 @@
 # ansible-tower
-Ansible Tower dockerized
 
-Ansible Tower (AT) is a GUI for great Ansible tool, that provides powerful remote agentless hosts management via SSH. Ansible Tower is free for case <=10 nodes, but complex to install and support restricted OS list.
+[![Imagelayer](https://images.microbadger.com/badges/image/schweizerischebundesbahnen/ansible-tower.svg)](https://microbadger.com/images/schweizerischebundesbahnen/ansible-tower)
+[![Build Status](https://travis-ci.org/SchweizerischeBundesbahnen/ansible-tower.svg?branch=master)](https://travis-ci.org/SchweizerischeBundesbahnen/ansible-tower)
 
-To help users get try AT with Docker benefits, I've create Docker image that potentially run on any mashine with Docker installed. This version install only local variant - all services(Redis, MongoDB, PostreSQL) inside container. 
+Ansible Tower dockerized. This image is based on https://github.com/ybalt/ansible-tower.
 
-Prepereqisites:
-- Docker 1.8 and later (older version may work but untested)
+DISCLAIMER: Although this image might be usable, we had to do some minor adaption to get it run on our infrastructure. The adaptions are namely:
 
-To run Ansible Tower there is two ways:
-Create container without external data mounts so if you remove container, all Postgres data that used by AT is lost:
+* Setting an own uid/gid from the host in the Dockerfile. Documented as CDP-159-block
+* Supervisor runs as non-root. Documented as CDP-71-block
+
+## Build
+
+The Image is build by travis-ci and pushed automatically to Dockerhub. Unfornatunaly due to the installation method ending up in a running http-instance, Dockerhub is not able to build this image. Therefore we are force to use travis-ci.
+
+* https://hub.docker.com/r/schweizerischebundesbahnen/ansible-tower/
+* https://travis-ci.org/SchweizerischeBundesbahnen/ansible-tower
+
+### Tagging Schema
+
+* latest-dev: Built feature-branch, everything but master
+* latest: Latest build on master
+* TAG: Build of git-tag, lastest also references to this build 
+
+## Run
+
+Mounts for settings (/etc/tower), postgres (/var/lib/postgresql/9.4/main), data (/var/lib/awx) and logs (/var/log/apache2, /var/log/postgresql, /var/log/supervisor, /var/log/tower) must exist. Otherwise, the image won't start.
+
+### /var/lib/postgresql/9.4/main
+
+* Mount for PostgresDB
+* bootstrapable with "docker-compose ansible-tower run intialize", if folder and /var/lib/awx leer are empty
+
+### /var/lib/awx
+
+* Mount for awx-data
+* bootstrapable with "docker-compose ansible-tower run intialize", if folder and /var/lib/postgresql/9.4/main leer are empty
+
+### /etc/tower
+
+* settings, must be present and can not be bootstrapped
+* conf.d/ha.py is going to be copied within "initialize"-command, since its ID mus be in sync with the DB 
+
+### /var/log
+
+* mounts für logs
+* can be empty
+
+
+## Start of the ansible-towers
+
+* docker and docker-compose must be present
+* /etc/tower mus be present externally
+
+1. Clonen of settings-repo containing /etc/tower
+e.g. within SBB-network
 ```
-# docker run -t -d -p 443:443 -p 8080:8080 -v ~/certs:/certs -e SERVER_NAME=localhost --name=ast ybalt/ansible-tower
-```
-OR
-Create separate data-only container, it will save your DB data even if ast container removed(upgrade, etc):
-```
-# docker create -v /var/lib/postgresql/9.4/main --name astdata ybalt/ansible-tower /bin/true
-# docker run -t -d --volumes-from astdata -v ~/certs:/certs -e SERVER_NAME=localhost -p 443:443 --name=ast ybalt/ansible-tower
+git clone https://code.sbb.ch/scm/~u217229/deploy-t-instance.git
 ```
 
-You may use mapping for /certs as above, to add certificate and license file. Startup script will copy files with this filenames to /etc/tower:
+2. At the first start: bootstrap
 ```
-/certs/domain.crt - copied to /etc/tower/tower.cert
-/certs/domain.key - copied to /etc/tower/tower.key
-/certs/license    - copied to /etc/tower/license
+cd deploy-t-instance
+docker-compose run ansible-tower initialize
 ```
-change SERVER_NAME env to your mashine ip/name for make HTTPS works (certificate should be valid for this name)
 
-Initial credentials: user:admin pass:000
-All passwords for all other services is '000'
+3. start of the tower
+```
+cd deploy-t-instance
+docker-compose up -d
+```
 
-Limitations:
-Only local DBs supported
+[Optional] Setting the admin-Password
+```
+docker exec -it deploytinstance_ansible-tower_1 tower-manage changepassword admin
+```
 
-Please keep in mind, if you remove ast container, some data may be lost even if you use 
-data-only container, as in Postgres AT store only projects/tasks/results.
+[Optional] Backup 
 
+Backups are written to mounted "/backup"-Mount
+```
+docker exec -it ANSIBLEINSTANCE ./backup.sh
+```
 
-If you find any bugs/issues or need some new features, feel free to make a pull request.
+[Optional] Restore 
 
-Trademarks:
-Ansible and Ansible Tower are trademarks of Ansible, Inc.
-Docker is a registered trademark of Docker, Inc.
+Restore need a tower-backup-latest.tar.gz in "/backup"-Mount. /var/lib/awx and /var/lib/postgresql/9.4/main must be empty. Tower must be stopped.
+```
+docker-compose run ansible-tower ./restore.sh
+```
+
+## Outline of this repo
+
+## ./configs
+
+Configs for building the tower, like inventory for the installation and patched.
+
+##  ./scripts
+scripts like entrypoint, backup and restore
+
+## Dockerfile, Readme, License
+
+WYSIWYG

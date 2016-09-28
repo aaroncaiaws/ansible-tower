@@ -1,41 +1,56 @@
 # Ansible Tower Dockerfie
 
 FROM ubuntu:14.04
+#Image based on https://github.com/ybalt/ansible-tower 
+MAINTAINER sebastian.graf@sbb.ch
 
-MAINTAINER ybaltouski@gmail.com
+ARG VCS_REF
 
-ENV ANSIBLE_TOWER_VER 2.4.1
-ENV PG_DATA /var/lib/postgresql/9.4/main
+LABEL org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/SchweizerischeBundesbahnen/ansible-tower"
 
-RUN apt-get install -y software-properties-common \
-    && apt-add-repository ppa:ansible/ansible \
+ENV ANSIBLE_TOWER_VER 3.0.2
+ENV USER root
+
+RUN apt-get update \
+    && apt-get install -y software-properties-common wget curl bsdmainutils\
+    && apt-add-repository -y ppa:ansible/ansible \
     && apt-get update \
-    && apt-get install -y ansible
+    && apt-get install -y ansible \
+    && apt-get clean
 
 ADD http://releases.ansible.com/awx/setup/ansible-tower-setup-${ANSIBLE_TOWER_VER}.tar.gz /opt/ansible-tower-setup-${ANSIBLE_TOWER_VER}.tar.gz
 
 RUN cd /opt && tar -xvf ansible-tower-setup-${ANSIBLE_TOWER_VER}.tar.gz \
     && rm -rf ansible-tower-setup-${ANSIBLE_TOWER_VER}.tar.gz \
-    && mv ansible-tower-setup-${ANSIBLE_TOWER_VER} /opt/tower-setup
+    && mv ansible-tower-setup-${ANSIBLE_TOWER_VER} /opt/tower-setup \
+    && ls /opt/tower-setup
 
-
-ADD tower_setup_conf.yml /opt/tower-setup/tower_setup_conf.yml
-ADD inventory /opt/tower-setup/inventory
+ADD configs/inventory /opt/tower-setup/inventory
 
 RUN cd /opt/tower-setup \
-    && ./setup.sh
+    && ./setup.sh \
+    && ansible-tower-service stop
 
-VOLUME ${PG_DATA}
-VOLUME /certs
+# / CDP-69 Patch Jira module
+ADD configs/patch.txt /tmp/patch.txt
+RUN patch /usr/lib/python2.7/dist-packages/ansible/modules/extras/web_infrastructure/jira.py /tmp/patch.txt
+# \ CDP-69 Patch Jira module
 
-ADD docker-entrypoint.sh /docker-entrypoint.sh
+#Backuping generated live data because various sources should be injected externally
+RUN echo "" \
+    && echo "Caring about postgres-database, data, certs, settings, logs" \
+    && mv /var/lib/postgresql/9.4/main /var/lib/postgresql/9.4/main.bak \
+    && mv /var/lib/awx /var/lib/awx.bak \
+    && mv /etc/tower /etc/tower.bak \
+    && mv /var/log/ /var/log.bak
 
-RUN chmod +x /docker-entrypoint.sh
+ADD scripts/docker-entrypoint.sh /docker-entrypoint.sh
+ADD scripts/backup.sh /backup.sh
+ADD scripts/restore.sh /restore.sh
+RUN chmod +x /docker-entrypoint.sh /backup.sh /restore.sh
 
-EXPOSE 443 8080
+EXPOSE 443 11230
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-
-CMD ["ansible-tower"]
-
-
+CMD ["start"]
