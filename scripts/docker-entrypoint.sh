@@ -28,8 +28,8 @@ if [ ! -d "/etc/tower" ]; then
    exit 101
 fi
 #Check if DB-Mount exists, exiting if not
-if [  ! -d "/var/lib/postgresql/9.4/main" ]; then
-    echo "DB-mount /var/lib/postgresql/9.4/main not existing, please mount in container"
+if [  ! -d "/var/lib/postgresql/9.4" ]; then
+    echo "DB-mount /var/lib/postgresql/9.4 not existing, please mount in container"
     exit 101
 fi
 #Check if AWX-Data exists, exiting if not
