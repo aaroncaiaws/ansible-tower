@@ -53,21 +53,21 @@ if [ "$1" = 'initialize' ]; then
     && sed -i -e "s/^ServerName.*/ServerName $SERVER_NAME/" ${APACHE_CONF} \
     || sed -i -e "1s/^/ServerName $SERVER_NAME\n/" ${APACHE_CONF}
     #Removing git-placeholder in settings-repo
-    rm -f /var/lib/postgresql/9.4/main/.gitignore /var/lib/awx/.gitignore
+    rm -f /var/lib/postgresql/9.4/.gitignore /var/lib/awx/.gitignore
     #Fail if Data is existing
     if [ "$(ls -A /var/lib/postgresql/9.4/main)" ] || [ "$(ls -A /var/lib/awx)" ]; then
         echo "DB (/var/lib/postgresql/9.4/main) and/or Data (/var/lib/awx) existing. Remove on Host first and try again. Exiting..."
         #Setting git-placeholder again
-        install -o 9005 -g 5002 -m 644 /dev/null /var/lib/postgresql/9.4/main/.gitignore 
+        install -o 9005 -g 5002 -m 644 /dev/null /var/lib/postgresql/9.4/.gitignore 
         install -o 9005 -g 5002 -m 644 /dev/null /var/lib/awx/.gitignore
         exit 102
     else
         #Setting git-placeholder again, anyhow
-        install -o 9005 -g 5002 -m 644 /dev/null /var/lib/postgresql/9.4/main/.gitignore 
+        install -o 9005 -g 5002 -m 644 /dev/null /var/lib/postgresql/9.4/.gitignore 
         install -o 9005 -g 5002 -m 644 /dev/null /var/lib/awx/.gitignore
     fi
     #Bootstrapping postgres from container
-    cp -pR /var/lib/postgresql/9.4/main.bak/. /var/lib/postgresql/9.4/main/
+    cp -pR /var/lib/postgresql/9.4/main.bak /var/lib/postgresql/9.4/main
     #Ugly hack to ensure that key stored in ha.py is in sync to the one stored in the db.
     #Otherwise, we are facing server errors
     cp -pR /etc/tower.bak/conf.d/ha.py /etc/tower/conf.d/ha.py
@@ -79,7 +79,6 @@ if [ "$1" = 'initialize' ]; then
     echo -e "[http]\n\tsslVerify = false"> /var/lib/awx/.gitconfig && cat /var/lib/awx/.gitconfig
     #Setting permissions to settings
     chown -R awx:awx /etc/tower
-    chmod 644 /var/lib/postgresql/9.4/main
     #Success Message
     echo -e "----------------------------------------"
     echo -e "Done Bootstrapping..."
