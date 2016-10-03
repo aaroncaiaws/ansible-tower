@@ -79,6 +79,7 @@ if [ "$1" = 'initialize' ]; then
     echo -e "[http]\n\tsslVerify = false"> /var/lib/awx/.gitconfig && cat /var/lib/awx/.gitconfig
     #Setting permissions to settings
     chown -R awx:awx /etc/tower
+    chmod 644 /var/lib/postgresql/9.4/main
     #Success Message
     echo -e "----------------------------------------"
     echo -e "Done Bootstrapping..."
