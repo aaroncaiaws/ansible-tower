@@ -55,8 +55,8 @@ if [ "$1" = 'initialize' ]; then
     #Removing git-placeholder in settings-repo
     rm -f /var/lib/postgresql/9.4/.gitignore /var/lib/awx/.gitignore
     #Fail if Data is existing
-    if [ "$(ls -A /var/lib/postgresql/9.4/main)" ] || [ "$(ls -A /var/lib/awx)" ]; then
-        echo "DB (/var/lib/postgresql/9.4/main) and/or Data (/var/lib/awx) existing. Remove on Host first and try again. Exiting..."
+    if [ "$(ls -A /var/lib/postgresql/9.4)" ] || [ "$(ls -A /var/lib/awx)" ]; then
+        echo "DB (/var/lib/postgresql/9.4) and/or Data (/var/lib/awx) existing. Remove on Host first and try again. Exiting..."
         #Setting git-placeholder again
         install -o 9005 -g 5002 -m 644 /dev/null /var/lib/postgresql/9.4/.gitignore 
         install -o 9005 -g 5002 -m 644 /dev/null /var/lib/awx/.gitignore
@@ -84,7 +84,7 @@ if [ "$1" = 'initialize' ]; then
     echo -e "Done Bootstrapping..."
     echo -e "----------------------------------------"
 elif [ "$1" = 'start' ]; then
-    if [ ! "$(ls -A /var/lib/postgresql/9.4/main)" ] || [ ! "$(ls -A /var/lib/awx)" ] || [ ! "$(ls -A /etc/tower)" ]; then
+    if [ ! "$(ls -A /var/lib/postgresql/9.4)" ] || [ ! "$(ls -A /var/lib/awx)" ] || [ ! "$(ls -A /etc/tower)" ]; then
         echo "DB and/or Data and/or Settings not existing. Clone and/or bootstrap first."
         exit 102
     fi
