@@ -40,7 +40,7 @@ RUN patch /usr/lib/python2.7/dist-packages/ansible/modules/extras/web_infrastruc
 #Backuping generated live data because various sources should be injected externally
 RUN echo "" \
     && echo "Caring about postgres-database, data, certs, settings, logs" \
-    && mv /var/lib/postgresql/9.4/main /var/lib/postgresql/9.4/main.bak \
+    && mv /var/lib/postgresql/9.4 /var/lib/postgresql/9.4.bak \
     && mv /var/lib/awx /var/lib/awx.bak \
     && mv /etc/tower /etc/tower.bak \
     && mv /var/log/ /var/log.bak

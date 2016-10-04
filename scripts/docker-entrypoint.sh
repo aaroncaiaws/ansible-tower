@@ -67,7 +67,7 @@ if [ "$1" = 'initialize' ]; then
         install -o 9005 -g 5002 -m 644 /dev/null /var/lib/awx/.gitignore
     fi
     #Bootstrapping postgres from container
-    cp -pR /var/lib/postgresql/9.4/main.bak /var/lib/postgresql/9.4/main
+    cp -pR /var/lib/postgresql/9.4.bak/main /var/lib/postgresql/9.4/main
     #Ugly hack to ensure that key stored in ha.py is in sync to the one stored in the db.
     #Otherwise, we are facing server errors
     cp -pR /etc/tower.bak/conf.d/ha.py /etc/tower/conf.d/ha.py
