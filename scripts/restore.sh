@@ -4,13 +4,10 @@ if [ ! -f /backup/tower-backup-latest.tar.gz ] ; then
     exit 102
 fi
 
-rm -f /var/lib/postgresql/9.4/.gitignore /var/lib/awx/.gitignore
 if [ "$(ls -A /var/lib/postgresql/9.4/main)" ] || [ "$(ls -A /var/lib/awx)" ]; then
     echo "DB (/var/lib/postgresql/9.4/main) and/or Data (/var/lib/awx) existing. Remove on Host first and try again. Exiting..."
     exit 102
 fi
-install -o 9005 -g 5002 /dev/null -m 644 /var/lib/postgresql/9.4/.gitignore 
-install -o 9005 -g 5002 /dev/null -m 644 /var/lib/awx/.gitignore
 
 #Copying backup to correct location
 cp /backup/tower-backup-latest.tar.gz /opt/tower-setup/tower-backup-latest.tar.gz
