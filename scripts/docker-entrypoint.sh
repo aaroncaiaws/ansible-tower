@@ -52,19 +52,10 @@ if [ "$1" = 'initialize' ]; then
     head -n 1 ${APACHE_CONF} | grep -q "^ServerName" \
     && sed -i -e "s/^ServerName.*/ServerName $SERVER_NAME/" ${APACHE_CONF} \
     || sed -i -e "1s/^/ServerName $SERVER_NAME\n/" ${APACHE_CONF}
-    #Removing git-placeholder in settings-repo
-    rm -f /var/lib/postgresql/9.4/.gitignore /var/lib/awx/.gitignore
     #Fail if Data is existing
     if [ "$(ls -A /var/lib/postgresql/9.4)" ] || [ "$(ls -A /var/lib/awx)" ]; then
         echo "DB (/var/lib/postgresql/9.4) and/or Data (/var/lib/awx) existing. Remove on Host first and try again. Exiting..."
-        #Setting git-placeholder again
-        install -o 9005 -g 5002 -m 644 /dev/null /var/lib/postgresql/9.4/.gitignore 
-        install -o 9005 -g 5002 -m 644 /dev/null /var/lib/awx/.gitignore
         exit 102
-    else
-        #Setting git-placeholder again, anyhow
-        install -o 9005 -g 5002 -m 644 /dev/null /var/lib/postgresql/9.4/.gitignore 
-        install -o 9005 -g 5002 -m 644 /dev/null /var/lib/awx/.gitignore
     fi
     #Bootstrapping postgres from container
     cp -pR /var/lib/postgresql/9.4.bak/main /var/lib/postgresql/9.4/main
