@@ -69,7 +69,7 @@ if [ "$1" = 'initialize' ]; then
     #Fixing SSL-Access: https://issues.sbb.ch/browse/CDP-68
     echo -e "[http]\n\tsslVerify = false"> /var/lib/awx/.gitconfig && cat /var/lib/awx/.gitconfig
     #Setting permissions to settings
-    chown -R awx:awx /etc/tower
+    chmod 666 /etc/tower/* /etc/tower/conf.d/* && chmod 777 /etc/tower /etc/tower/conf.d
     #Success Message
     echo -e "----------------------------------------"
     echo -e "Done Bootstrapping..."
