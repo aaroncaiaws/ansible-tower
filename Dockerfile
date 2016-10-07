@@ -50,7 +50,7 @@ ADD scripts/backup.sh /backup.sh
 ADD scripts/restore.sh /restore.sh
 RUN chmod +x /docker-entrypoint.sh /backup.sh /restore.sh
 
-EXPOSE 443 11230
+EXPOSE 80 443 11230
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["start"]
