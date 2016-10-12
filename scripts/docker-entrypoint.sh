@@ -6,42 +6,42 @@ set -x # echo everything
 trap "kill -15 -1 && echo all proc killed" TERM KILL INT
 
 #Correcting Apache Config, must occur here since Apache Config is transient
-if [[ ${SERVER_NAME} ]]; then
-   echo "add ServerName to $SERVER_NAME"
-   head -n 1 ${APACHE_CONF} | grep -q "^ServerName" \
-   && sed -i -e "s/^ServerName.*/ServerName $SERVER_NAME/" ${APACHE_CONF} \
-   || sed -i -e "1s/^/ServerName $SERVER_NAME\n/" ${APACHE_CONF}
-fi
-
+#if [[ ${SERVER_NAME} ]]; then
+#   echo "add ServerName to $SERVER_NAME"
+#   head -n 1 ${APACHE_CONF} | grep -q "^ServerName" \
+#   && sed -i -e "s/^ServerName.*/ServerName $SERVER_NAME/" ${APACHE_CONF} \
+#   || sed -i -e "1s/^/ServerName $SERVER_NAME\n/" ${APACHE_CONF}
+#fi
+#
 #Check if Log Data exists, exiting if not
-if [  ! -d "/var/log" ] ; then
-    echo "Mount for log /var/log not existing, please mount in container"
-    exit 101
-else
-    cp -pRn /var/log.bak/. /var/log
-    setfacl -Rm o:r-X,d:o:r-X /var/log
-fi
-#Fail Fast, Settings not existing, exiting because of missing clone
-if [ ! -d "/etc/tower" ]; then
-   echo "Settings /etc/tower not existing"
-   echo "Please clone a repository with a valid \"input\"-folder and related settings."
-   exit 101
-fi
-#Check if DB-Mount exists, exiting if not
-if [  ! -d "/var/lib/postgresql/9.4" ]; then
-    echo "DB-mount /var/lib/postgresql/9.4 not existing, please mount in container"
-    exit 101
-fi
-#Check if AWX-Data exists, exiting if not
-if [  ! -d "/var/lib/awx" ]; then
-    echo "AWX-Data Mount /var/lib/awx not existing, please mount in container"
-    exit 101
-fi
-#Check if Secret Data exists, exiting if not
-if [  ! -d "/secret" ]; then
-    echo "Mount for secret-data /secret not existing, please mount in container"
-    exit 101
-fi
+#if [  ! -d "/var/log" ] ; then
+#    echo "Mount for log /var/log not existing, please mount in container"
+#    exit 101
+#else
+#    cp -pRn /var/log.bak/. /var/log
+#    setfacl -Rm o:r-X,d:o:r-X /var/log
+#fi
+##Fail Fast, Settings not existing, exiting because of missing clone
+#if [ ! -d "/etc/tower" ]; then
+#   echo "Settings /etc/tower not existing"
+#   echo "Please clone a repository with a valid \"input\"-folder and related settings."
+#   exit 101
+#fi
+##Check if DB-Mount exists, exiting if not
+#if [  ! -d "/var/lib/postgresql/9.4" ]; then
+#    echo "DB-mount /var/lib/postgresql/9.4 not existing, please mount in container"
+#    exit 101
+#fi
+##Check if AWX-Data exists, exiting if not
+#if [  ! -d "/var/lib/awx" ]; then
+#    echo "AWX-Data Mount /var/lib/awx not existing, please mount in container"
+#    exit 101
+#fi
+##Check if Secret Data exists, exiting if not
+#if [  ! -d "/secret" ]; then
+#    echo "Mount for secret-data /secret not existing, please mount in container"
+#    exit 101
+#fi
 
 # remove stale pid file when restarting the same container
 rm -f /run/apache2/apache2.pid
