@@ -36,6 +36,10 @@ RUN cd /opt/tower-setup \
 ADD configs/patch.txt /tmp/patch.txt
 RUN patch /usr/lib/python2.7/dist-packages/ansible/modules/extras/web_infrastructure/jira.py /tmp/patch.txt
 # \ CDP-69 Patch Jira module
+# / CDP-174 Adding windows modules
+RUN pip install xmltodict pywinrm
+# \ CDP-174 Adding windows modules
+
 
 #Backuping generated live data because various sources should be injected externally
 RUN echo "" \
