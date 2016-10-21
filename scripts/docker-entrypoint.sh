@@ -13,6 +13,11 @@ if [[ ${SERVER_NAME} ]]; then
    || sed -i -e "1s/^/ServerName $SERVER_NAME\n/" ${APACHE_CONF}
 fi
 
+#Check if Persisted Data exists, exiting if not
+if [  ! -d "/tmp/persisted" ]; then
+   echo "Mount for persisted-data /tmp/persisted not existing, skipping..."
+   exit 101
+fi
 #Check if Log Data exists, exiting if not
 if [  ! -d "/var/log" ] ; then
    echo "Mount for log /var/log not existing, please mount in container"
@@ -54,10 +59,8 @@ if [ "$1" = 'initialize' ]; then
     #Bootstrapping postgres from container
     cp -pR /var/lib/postgresql/9.4.bak/main /var/lib/postgresql/9.4/main
     #Ugly hack to ensure that key stored in ha.py is in sync to the one stored in the db.
-    #Otherwise, we are facing server errors
-    if [ -d "/tmp/etc/tower" ]; then
-        cp -p /etc/tower/conf.d/ha.py /tmp/etc/tower/conf.d/ha.py
-    fi
+    #Copying it to "/tmp/persisted"
+    cp -p /etc/tower/conf.d/ha.py /tmp/persisted/ha.py
     #Bootstrapping AWX-Data from container
     cp -pR /var/lib/awx.bak/. /var/lib/awx/
     #Fixing Websocketport: https://issues.sbb.ch/browse/CDP-64
@@ -74,6 +77,8 @@ elif [ "$1" = 'start' ]; then
         exit 102
     fi
     source /secret/*
+    #ha.py need to be copied from host
+    cp -R --no-preserve=mode,ownership --backup /tmp/persisted/ha.py /etc/tower/conf.d/ha.py
     #Starting the tower
     ansible-tower-service start
     echo -e "----------------------------------------"
