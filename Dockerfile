@@ -13,7 +13,7 @@ ENV ANSIBLE_TOWER_VER 3.0.2
 ENV USER root
 
 RUN apt-get update \
-    && apt-get install -y software-properties-common wget curl bsdmainutils libapache2-mod-python \
+    && apt-get install -y software-properties-common wget curl bsdmainutils \
     # / CDP-209 Kerberos Integration
     && apt-get install -y python-dev libkrb5-dev krb5-user \
     # \ CDP-209 Kerberos Integration
