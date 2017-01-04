@@ -79,7 +79,10 @@ elif [ "$1" = 'start' ]; then
     source /secret/*
     #ha.py need to be copied from host
     cp -R --no-preserve=mode,ownership --backup /tmp/persisted/ha.py /etc/tower/conf.d/ha.py
-    #Starting the tower
+    #.tower_version must be replaced every time the container start
+    cp -R --no-preserve=mode,ownership --backup /var/lib/awx.bak/.tower_version /var/lib/awx/.tower_version
+   
+	#Starting the tower
     ansible-tower-service start
     echo -e "----------------------------------------"
     echo -e "Tower started, Process idles......."
