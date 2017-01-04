@@ -9,7 +9,7 @@ ARG VCS_REF
 LABEL org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url="https://github.com/SchweizerischeBundesbahnen/ansible-tower"
 
-ENV ANSIBLE_TOWER_VER 3.0.2
+ENV ANSIBLE_TOWER_VER 3.0.3
 ENV USER root
 
 RUN apt-get update \
