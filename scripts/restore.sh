@@ -18,5 +18,8 @@ ansible-tower-service start
 sleep 10
 #restoring
 /opt/tower-setup/setup.sh -r /opt/tower-setup/tower-backup-latest.tar.gz
+#storing the restored ha.py to persistent volume
+cp -p /etc/tower/conf.d/ha.py /tmp/persisted/ha.py
+#settle everything and stop
 sleep 10
 ansible-tower-service stop
