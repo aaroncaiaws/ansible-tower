@@ -1,4 +1,4 @@
-219c219,223
+223c223,227
 <         createfields.update(params['fields'])
 ---
 >          # value is of type string, convert to a dict
@@ -6,3 +6,7 @@
 >          json_acceptable_string = s.replace("'", "\"")
 >          tmp = json.loads(json_acceptable_string)
 >          createfields.update(tmp)
+314c318
+<             fields=dict(default={}, type='dict')
+---
+>             fields=dict(default={})
